@@ -1,0 +1,258 @@
+env_name: [PacmanGridNorth-v0, PacmanGridSouth-v0, PacmanGridEast-v0, PacmanGridWest-v0]
+env_suite: suite_gym
+n_trials: 1
+checkpoint: False
+seed: 42
+log_interval: 1000
+log_videos: False
+replay_buffer_size: 500000
+n_eval_episodes: 30
+n_eval_interval: 10000
+steps: 1000000
+n_parallel_envs: 4
+final_exploration_step: 100000
+wae_batch_size: 128
+wandb_entity: your_entity_here
+study_name: study
+display_progressbar: False
+time_limit: 115200
+min_q_value: -1.
+max_q_value: 2.
+env_perturbation: 0.01
+
+hyperparameters:
+  latent_state_size:
+    type: int
+    min: 12
+    max: 15
+  num_hidden_layers:
+    type: int
+    min: 1
+    max: 3
+  num_units_per_hidden_layer:
+    type: categorical
+    choices: [128, 256, 512]
+  activation:
+    type: categorical
+    choices: [relu, leaky_relu, sigmoid, tanh, elu]
+  cnn_layers_activation:
+    type: categorical
+    choices: [relu, leaky_relu]
+  cnn_config:
+    type: str_categorical
+    choices:
+      # - filters: [32, 64, 16]
+      #   kernel: [3, 4, 3]
+      #   strides: [2, 2, 1]
+      # - filters: [16, 32, 16]
+      #   kernel: [5, 4, 3]
+      #   strides: [3, 2, 1]
+      # - filters: [16, 32, 32]
+      #   kernel: [4, 2, 3]
+      #   strides: [2, 1, 1]
+      # - filters: [16, 32, 64]
+      #   strides: [2, 1, 1]
+      #   kernel: [7, 5, 3]
+      - filters: [32, 64, 16]
+        strides: [2, 1, 1]
+        kernel: [3, 5, 7]
+      - filters: [64, 32, 16]
+        strides: [2, 1, 1]
+        kernel: [3, 3, 3]
+  state_encoder_temperature:
+    type: categorical
+    choices: [0.3333333, .5, 0.6666666, .75, .99]
+  state_prior_temperature:
+    type: categorical
+    choices: [0.3333333, .5, 0.6666666, .75, .99]
+  gradient_penalty_scale_factor:
+    type: categorical
+    choices: [10.]
+  steady_state_regularizer_scale_factor:
+    type: categorical
+    choices: [10., 25., 50., 75.]
+  transition_regularizer_scale_factor:
+    type: categorical
+    choices: [10., 25., 50., 75.]
+  gamma:
+    type: categorical
+    choices: [.99]
+  wae_minimizer_learning_rate:
+    type: categorical
+    choices: [1.e-4, 5.e-4, 1.e-3]
+  wae_maximizer_learning_rate:
+    type: categorical
+    choices: [1.e-4, 5.e-4, 1.e-3]
+  encoder_learning_rate:
+    type: categorical
+    choices: [1.e-4, 5.e-4, 1.e-3]
+  policy_learning_rate:
+    type: categorical
+    choices: [1.e-4, 2.5e-4, 6.25e-5, 1.e-3]
+  n_wae_critic:
+    type: categorical
+    choices: [5]
+  n_wae_updates:
+    type: categorical
+    choices: [1]
+  use_boltzmann:
+    type: categorical
+    choices: [True, False]
+  hard_target_updates:
+    type: categorical
+    choices: [True, False]
+  state_cost_fn:
+    type: str_categorical
+    choices:
+      - [l22, l22, l22, l22]
+      - [binary_cross_entropy, binary_cross_entropy, l22, l22]
+  state_cost_weights:
+    type: str_categorical
+    choices:
+      - [1., 1., 1., 1.]
+      - [1., 1., 10., 10.]
+  reward_cost_fn:
+    type: categorical
+    choices: [l2, l22]
+  reward_scaling:
+    type: categorical
+    choices: [1., 10., 25., 100.]
+  reward_cost_weight:
+    type: categorical
+    choices: [1., 10.]
+  use_batch_norm:
+    type: categorical
+    choices: [False]
+  use_gradient_clipping:
+    type: categorical
+    choices: [True, False]
+  her:
+    type: categorical
+    choices: [False]
+  categorical:
+    type: categorical
+    choices: [True, False]
+
+  conditionals:
+    - vars: [her]
+      cond: her
+      if_cond:
+        her_n_future_samples:
+          type: categorical
+          choices: [1, 2, 4]
+        her_time_step_cost:
+          type: categorical
+          choices: [0.1, 0.5, 1., 10.]
+        her_state_penalty_multiplier:
+          type: categorical
+          choices: [1., 10., 0.1, 0.5, 5.]
+        her_goal_reward_multiplier:
+          type: categorical
+          choices: [1., 10., 0.1, 0.5, 5.]
+        her_reward_horizon:
+          type: categorical
+          choices: [100, 200]
+        her_sampling_strategy:
+          type: categorical
+          choices: [future, final]
+        initial_collect_episodes:
+          type: constant
+          value: 5
+        initial_collect_steps:
+          type: constant
+          value: null
+        collect_steps_per_iteration:
+          type: constant
+          value: null
+        collect_episodes_per_iteration:
+          type: constant
+          value: 16
+        policy_batch_size:
+          type: categorical
+          choices: [64, 128]
+      else:
+        her_n_future_samples:
+          type: constant
+          value: 1
+        her_time_step_cost:
+          type: constant
+          value: 10.
+        her_state_penalty_multiplier:
+          type: constant
+          value: 1.
+        her_goal_reward_multiplier:
+          type: constant
+          value: 1.
+        her_reward_horizon:
+          type: constant
+          value: 100
+        her_sampling_strategy:
+          type: constant
+          value: final
+        initial_collect_episodes:
+          type: constant
+          value: null
+        initial_collect_steps:
+          type: constant
+          value: 20000
+        collect_steps_per_iteration:
+          type: constant
+          value: 1
+        collect_episodes_per_iteration:
+          type: constant
+          value: null
+        policy_batch_size:
+          type: categorical
+          choices: [32, 64]
+    - vars: [use_boltzmann]
+      cond: use_boltzmann
+      if_cond:
+        boltzmann_temperature:
+          type: categorical
+          choices: [1., 0.75, 10., 100.]
+        epsilon_greedy:
+          type: constant
+          value: null
+      else:
+        boltzmann_temperature:
+          type: constant
+          value: null
+        epsilon_greedy:
+          type: constant
+          value: .1
+    - vars: [hard_target_updates]
+      cond: hard_target_updates
+      if_cond:
+        target_update_period:
+          type: categorical
+          choices: [250, 1000, 2500, 10000]
+        target_update_scale:
+          type: constant
+          value: 1
+      else:
+        target_update_period:
+          type: constant
+          value: 1
+        target_update_scale:
+          type: categorical
+          choices: [4.e-3, 1.e-3, 4.e-4, 1.e-4]
+    - vars: [use_gradient_clipping]
+      cond: use_gradient_clipping
+      if_cond:
+        policy_gradient_clipping:
+          type: categorical
+          choices: [1., 5., 10.]
+      else:
+        policy_gradient_clipping:
+          type: constant
+          value: null
+    - vars: [categorical]
+      cond: categorical
+      if_cond:
+        n_step_update:
+          type: categorical
+          choices: [2, 5]
+      else:
+        n_step_update:
+          type: constant
+          value: 1

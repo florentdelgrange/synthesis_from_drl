@@ -1,0 +1,151 @@
+import collections
+from typing import Callable, Optional, Union, OrderedDict
+import tensorflow as tf
+from tf_agents import specs
+from tf_agents.environments.tf_environment import TFEnvironment
+from tf_agents.policies import TFPolicy
+from tf_agents.typing import types
+from tf_agents.trajectories import time_step as ts, policy_step
+
+from util.io import dataset_generator
+
+
+class DiscreteActionTFEnvironmentWrapper(TFEnvironment):
+    def __init__(self,
+                 tf_env: TFEnvironment,
+                 action_embedding_function: Callable[[tf.Tensor, tf.Tensor], tf.Tensor],
+                 number_of_discrete_actions: int,
+                 reward_scaling: Optional[float] = 1.):
+        super(DiscreteActionTFEnvironmentWrapper, self).__init__(
+            time_step_spec=tf_env.time_step_spec(),
+            action_spec=specs.BoundedTensorSpec(
+                shape=(),
+                dtype=tf.int64,
+                minimum=0,
+                maximum=number_of_discrete_actions - 1,
+                name='latent_action'),
+            batch_size=tf_env.batch_size)
+        self.wrapped_env: TFEnvironment = tf_env
+        self.action_embedding_function = action_embedding_function
+        self.reward_scaling = reward_scaling
+
+    def _current_time_step(self):
+        time_step = self.wrapped_env.current_time_step()
+        return time_step._replace(reward=self.reward_scaling * time_step.reward)
+
+    def _reset(self):
+        time_step = self.wrapped_env.reset()
+        return time_step._replace(reward=self.reward_scaling * time_step.reward)
+
+    def _step(self, latent_action):
+        real_action = self.action_embedding_function(self.current_time_step().observation, latent_action)
+        time_step = self.wrapped_env.step(real_action)
+        return time_step._replace(reward=self.reward_scaling * time_step.reward)
+
+    def render(self):
+        return self.wrapped_env.render()
+
+
+class LatentEmbeddingTFEnvironmentWrapper(TFEnvironment):
+    def __init__(
+            self,
+            tf_env: TFEnvironment,
+            state_embedding_fn: Callable[[tf.Tensor, tf.Tensor], tf.Tensor],
+            action_embedding_fn: Callable[[tf.Tensor, tf.Tensor], tf.Tensor],
+            labeling_fn: Callable[[tf.Tensor], tf.Tensor],
+            latent_state_size: int,
+            number_of_discrete_actions: int,
+            reward_scaling: Optional[float] = 1.,
+            latent_state_dtype: Optional[tf.dtypes.DType] = tf.int32
+    ):
+        super(LatentEmbeddingTFEnvironmentWrapper, self).__init__(
+            time_step_spec=ts.time_step_spec(
+                observation_spec={
+                    'state': tf_env.observation_spec(),
+                    'latent_state': specs.BoundedTensorSpec(
+                        shape=(latent_state_size,),
+                        dtype=latent_state_dtype,
+                        minimum=0,
+                        maximum=1,
+                        name='latent_state'
+                    )}),
+            action_spec=specs.BoundedTensorSpec(
+                shape=(),
+                dtype=tf.int64,
+                minimum=0,
+                maximum=number_of_discrete_actions - 1,
+                name='latent_action'),
+            batch_size=tf_env.batch_size)
+        self._wrapped_env: TFEnvironment = tf_env
+        self.state_embedding_fn = state_embedding_fn
+        self.action_embedding_fn = action_embedding_fn
+        self.reward_scaling = reward_scaling
+        self.labeling_fn = dataset_generator.ergodic_batched_labeling_function(labeling_fn)
+        self._current_latent_state = None
+
+    def __getattr__(self, name):
+        return getattr(self._wrapped_env, name)
+
+    def _current_time_step(self):
+        if self._current_latent_state is None:
+            return self.reset()
+
+        time_step = self._wrapped_env.current_time_step()
+        return time_step._replace(
+            observation={
+                'state': time_step.observation,
+                'latent_state': self._current_latent_state},
+            reward=self.reward_scaling * time_step.reward)
+
+    def _reset(self):
+        time_step = self._wrapped_env.reset()
+        label = self.labeling_fn(time_step.observation)
+        if type(time_step.observation) is OrderedDict:
+            time_step = time_step._replace(observation=collections.OrderedDict([
+                (key,  tf.cast(value, tf.float32)) for key, value in time_step.observation.items()
+            ]))
+        self._current_latent_state = self.state_embedding_fn(time_step.observation, label)
+        return self._current_time_step()
+
+    def _step(self, latent_action):
+        latent_action = self.action_embedding_fn(self._current_latent_state, latent_action)
+        next_time_step = self._wrapped_env.step(latent_action)
+        next_state_label = self.labeling_fn(next_time_step.observation)
+        next_latent_state = self.state_embedding_fn(next_time_step.observation, next_state_label)
+        self._current_latent_state = next_latent_state
+        return next_time_step._replace(
+            observation={
+                'state': next_time_step.observation,
+                'latent_state': next_latent_state},
+            reward=self.reward_scaling * next_time_step.reward)
+
+    def render(self):
+        return self._wrapped_env.render()
+
+    def wrap_latent_policy(self, latent_policy: TFPolicy, observation_dtype: Optional[tf.dtypes.DType] = None):
+
+        class LatentPolicyWrapper(TFPolicy):
+
+            _latent_policy = latent_policy
+            _observation_dtype = latent_policy.time_step_spec.observation.dtype \
+                if observation_dtype is None else observation_dtype
+
+            def _distribution(
+                    self,
+                    time_step: ts.TimeStep,
+                    policy_state: types.NestedTensorSpec
+            ) -> policy_step.PolicyStep:
+                distr = getattr(
+                    self._latent_policy,
+                    '_distribution',
+                    self._latent_policy.distribution)
+                observation = tf.cast(time_step.observation['latent_state'], self._observation_dtype)
+                return distr(
+                    time_step=time_step._replace(observation=observation),
+                    policy_state=policy_state)
+
+        return LatentPolicyWrapper(
+            time_step_spec=self.time_step_spec(),
+            action_spec=self.action_spec(),
+            policy_state_spec=getattr(latent_policy, 'policy_state_spec', ()),
+            info_spec=getattr(latent_policy, 'info_spec', ()))

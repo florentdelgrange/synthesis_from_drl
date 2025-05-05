@@ -1,0 +1,19 @@
+{
+    "Directions.RIGHT": {
+        "wae_model": "reinforcement_learning/saves/doom/run_b809u5l5/seed_42/saves/DoomRoomEast-v0/wae_dqn/best_model/wae_mdp/",
+        "policy": "reinforcement_learning/saves/doom/run_b809u5l5/seed_42/saves/DoomRoomEast-v0/wae_dqn/best_model/policy/"
+    },
+    "Directions.DOWN": {
+        "wae_model": "reinforcement_learning/saves/doom/2024-12-21/continuous/run_b809u5l5/seed_42/saves/DoomRoomSouth-v0/wae_dqn/best_model/wae_mdp/",
+        "policy": "reinforcement_learning/saves/doom/2024-12-21/continuous/run_b809u5l5/seed_42/saves/DoomRoomSouth-v0/wae_dqn/best_model/policy/"
+    },
+    "Directions.LEFT": {
+        "wae_model": "reinforcement_learning/saves/doom/2024-12-21/continuous/run_b809u5l5/seed_42/saves/DoomRoomWest-v0/wae_dqn/best_model/wae_mdp/",
+        "policy": "reinforcement_learning/saves/doom/2024-12-21/continuous/run_b809u5l5/seed_42/saves/DoomRoomWest-v0/wae_dqn/best_model/policy/"
+    },
+    "Directions.UP": {
+        "wae_model": "reinforcement_learning/saves/doom/2024-12-21/continuous/run_b809u5l5/seed_42/saves/DoomRoomNorth-v0/wae_dqn/wae_mdp/trial_number=2787-seed=42/model/step_1600000/",
+        "policy": "reinforcement_learning/saves/doom/2024-12-21/continuous/run_b809u5l5/seed_42/saves/DoomRoomNorth-v0/wae_dqn/policy/trial_number=2787-seed=42/step_1600000"
+    }
+
+}

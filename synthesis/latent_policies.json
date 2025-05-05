@@ -1,0 +1,19 @@
+{
+    "Directions.UP": {
+        "wae_model": "reinforcement_learning/saves/PacmanGridEasyNorth-v0/wae_dqn/best_model/wae_mdp/",
+        "policy": "reinforcement_learning/saves/PacmanGridEasyNorth-v0/wae_dqn/best_model/policy"
+    },
+    "Directions.DOWN": {
+        "wae_model": "reinforcement_learning/saves/PacmanGridEasySouth-v0/wae_dqn/best_model/wae_mdp/",
+        "policy": "reinforcement_learning/saves/PacmanGridEasySouth-v0/wae_dqn/best_model/policy/"
+    },
+    "Directions.LEFT": {
+        "wae_model": "reinforcement_learning/saves/PacmanGridEasyWest-v0/wae_dqn/best_model/wae_mdp/",
+        "policy": "reinforcement_learning/saves/PacmanGridEasyWest-v0/wae_dqn/best_model/policy"
+    },
+    "Directions.RIGHT": {
+        "wae_model": "reinforcement_learning/saves/PacmanGridEasyEast-v0/wae_dqn/best_model/wae_mdp/",
+        "policy": "reinforcement_learning/saves/PacmanGridEasyEast-v0/wae_dqn/best_model/policy"
+    }
+}
+

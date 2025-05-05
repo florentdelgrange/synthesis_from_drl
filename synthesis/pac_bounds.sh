@@ -1,0 +1,1 @@
+python synthesize.py --pac_bounds --delta 0.05 --epsilon 0.01 --average_episode_length 120 --tags pac_bounds --estimate_entrance_function=false --grid_path=../grid_easyEval.txt
