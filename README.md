@@ -25,16 +25,15 @@ cd reinforcement_learning
 ```
 ### Synthesis from WAE-DQN policies
 ```
-cd reinforcement_learning/environments/pacman/hierarchical_synthesis/
-./synth.sh
+./synthesis/synth_doom.sh
+./synthesis/synth_pacman.sh
 ```
 ### Compute PAC bounds
 ```
-cd reinforcement_learning/environments/pacman/hierarchical_synthesis/
-./pac_bounds.sh
+./synthesis/pac_bounds.sh
 ```
 ### Pre-trained models
-Pre-trained models can be found in the folder `reinforcement_learning/saves`.
+Pre-trained low-level policies can be found in the folder `reinforcement_learning/saves`.
 
 ## Cite
 If you use this code, please cite it as:
