@@ -936,7 +936,7 @@ class HighLevelEnvironment(PacmanEnvEval, TwoLevelEnv):
         s_init = super(PacmanEnvEval, self).reset(**kwargs)
         self._current_goal = np.stack(np.where(self.grid == MapItems.GOAL), axis=-1)
         self._previous_initial_position = self.pacman.x, self.pacman.y
-        self.lives = 5
+        self.reset_life_points()
         self.n_rooms = len(self.rooms)
         return s_init
 
