@@ -1,7 +1,7 @@
 # Composing Reinforcement Learning Policies, with Formal Guarantees
 Code for replicating the experiments from the paper [*Composing Reinforcement Learning Policies, with Formal Guarantees*](https://arxiv.org/abs/2402.13785).
 
-### Summary
+## Summary
 **This project aims at combining _reinforcement learning_ (RL) and _reactive synthesis_ to equip learning agents with reliable control policies in large, complex environments.**
 
 While **deep RL** is very effective for allowing learning agents to solve complex tasks, (1) it requires (extensive) reward engineering to align the user's intentions with the learned agent's behaviors, and (2) the learned agent's policies are not reliable (no guarantee).
@@ -20,7 +20,7 @@ The approach relies on learning **world models** and **discrete latent spaces**,
 
 ![Demo](assets/fusing_drl_components.gif)
 
-### New RL algorithm and environments
+## New RL algorithm and environments
 The project also includes WAE-DQN, an RL algorithm learning a discrete and verifiable world model along with its policy, and new "two-level" environments:
 - [A large, parameterizable grid world with moving obstacles](https://youtu.be/crowN8-GaRg)
 - A 8-room [A ViZDoom scenario](https://florentdelgrange.netlify.app/post/composing_rl/video.mp4) with ennemies randomly spawning on the map at regular interval.
@@ -29,7 +29,7 @@ The two environments come with low- and high-level variants.
 In the low-level variant, the agent is placed in a _room_ of the two-level environment and its goal is to reach the exit safely, by avoiding moving obstacles.
 In the high-level variant, the goal of the agent is to navigate safely through the rooms composing the environment to reach a target location.
 
-### Resources
+## Resources
 More details can be found in [our paper](https://arxiv.org/abs/2402.13785). See also our [blogpost](https://florentdelgrange.netlify.app/post/composing_rl/).
 Videos of synthesized controllers in can be found here:
 - [Large grid world](https://youtu.be/crowN8-GaRg)
